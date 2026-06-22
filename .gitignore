@@ -1,0 +1,27 @@
+# Generated / build artifacts
+target/
+
+# IDE
+.idea/
+.vscode/
+*.sublime-*
+.codebuddy
+.trae
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backup files
+*.bak
+*.backup
+*.tmp
+*.rs.bk
+
+# Test coverage
+coverage/
+*.profraw
+
+# Tools (keep only the idiom data generator)
+tools/
+!tools/generate_idiom_data.py
