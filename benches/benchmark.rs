@@ -1,5 +1,5 @@
 use criterion::{criterion_group, criterion_main, Criterion};
-use fci4096::{generate, from_entropy, from_phrase, IdiomMnemonic, IdiomMnemonicSize};
+use fci4096::{from_entropy, from_phrase, generate, IdiomMnemonic, IdiomMnemonicSize};
 
 fn bench_generate_12(c: &mut Criterion) {
     c.bench_function("generate_12_idioms", |b| {

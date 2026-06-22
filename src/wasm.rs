@@ -1,5 +1,5 @@
-use wasm_bindgen::prelude::*;
 use crate::{ChineseIdiomList, IdiomMnemonic, IdiomMnemonicSize};
+use wasm_bindgen::prelude::*;
 
 /// Generate a random mnemonic (WASM export).
 ///
@@ -35,10 +35,10 @@ pub fn generate(idiom_count: u32) -> Result<String, JsValue> {
 /// `passphrase` is an optional password (`None` means empty password).
 /// Returns a 64-byte seed.
 #[wasm_bindgen]
-pub fn to_seed(phrase: &str, passphrase: Option<&str>) -> Result<Vec<u8>, JsValue> {
+pub fn to_seed(phrase: &str, passphrase: Option<String>) -> Result<Vec<u8>, JsValue> {
     let idiom_mnemonic =
         IdiomMnemonic::from_phrase(phrase).map_err(|e| JsValue::from_str(&format!("{}", e)))?;
-    let pass = passphrase.unwrap_or("");
+    let pass = passphrase.as_deref().unwrap_or("");
     let seed = idiom_mnemonic.to_seed(pass);
     Ok(seed.to_vec())
 }

@@ -1,6 +1,6 @@
 [package]
 name = "fci4096"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "BIP39 mnemonic implementation using 4096 Chinese idioms"
 license = "MIT"
@@ -32,9 +32,8 @@ serde = ["dep:serde"]
 [dependencies]
 digest = { version = "0.10", default-features = false }
 hmac = { version = "0.12", default-features = false }
-pbkdf2 = { version = "0.12", default-features = false, features = ["hmac", "simple"] }
+pbkdf2 = { version = "0.12", default-features = false, features = ["hmac"] }
 sha2 = { version = "0.10", default-features = false }
-thiserror = { version = "1.0", default-features = false }
 
 unicode-normalization = { version = "0.1", default-features = false }
 
@@ -62,4 +61,4 @@ harness = false
 
 # On wasm32 targets, getrandom needs the js feature for crypto.getRandomValues()
 [target.'cfg(target_arch = "wasm32")'.dependencies]
-getrandom = { version = "0.2", features = ["js"] }
+getrandom = { version = "0.2", default-features = false, features = ["js"] }

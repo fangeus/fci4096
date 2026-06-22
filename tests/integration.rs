@@ -1,15 +1,18 @@
-use fci4096::{IdiomMnemonicSize, generate, from_entropy, from_phrase, validate, idiom_to_index, index_to_idiom};
+use fci4096::{
+    from_entropy, from_phrase, generate, idiom_to_index, index_to_idiom, validate,
+    IdiomMnemonicSize,
+};
 
 #[test]
 fn test_generate_recover_validate() {
     let idiom_mnemonic = generate(IdiomMnemonicSize::Idioms12).unwrap();
     let phrase = idiom_mnemonic.phrase();
-    
+
     assert!(validate(&phrase));
-    
+
     let recovered = from_phrase(&phrase).unwrap();
     assert_eq!(idiom_mnemonic, recovered);
-    
+
     let entropy = idiom_mnemonic.to_entropy().unwrap();
     let from_entropy_mnemonic = from_entropy(&entropy).unwrap();
     assert_eq!(idiom_mnemonic, from_entropy_mnemonic);
@@ -17,16 +20,24 @@ fn test_generate_recover_validate() {
 
 #[test]
 fn test_all_idiom_mnemonic_sizes() {
-    for size in [IdiomMnemonicSize::Idioms12, IdiomMnemonicSize::Idioms15, IdiomMnemonicSize::Idioms18, IdiomMnemonicSize::Idioms21, IdiomMnemonicSize::Idioms24].iter() {
+    for size in [
+        IdiomMnemonicSize::Idioms12,
+        IdiomMnemonicSize::Idioms15,
+        IdiomMnemonicSize::Idioms18,
+        IdiomMnemonicSize::Idioms21,
+        IdiomMnemonicSize::Idioms24,
+    ]
+    .iter()
+    {
         let idiom_mnemonic = generate(*size).unwrap();
         assert_eq!(idiom_mnemonic.idioms().len(), size.idiom_count());
-        
+
         let phrase = idiom_mnemonic.phrase();
         assert!(validate(&phrase));
-        
+
         let recovered = from_phrase(&phrase).unwrap();
         assert_eq!(idiom_mnemonic, recovered);
-        
+
         let entropy = idiom_mnemonic.to_entropy().unwrap();
         assert_eq!(entropy.len() * 8, size.entropy_bits());
     }
@@ -37,7 +48,7 @@ fn test_seed_generation() {
     let idiom_mnemonic = generate(IdiomMnemonicSize::Idioms12).unwrap();
     let seed = idiom_mnemonic.to_seed("");
     assert_eq!(seed.len(), 64);
-    
+
     let seed_with_passphrase = idiom_mnemonic.to_seed("test_passphrase");
     assert_ne!(seed, seed_with_passphrase);
 }
@@ -58,7 +69,10 @@ fn test_invalid_phrase() {
 
 #[test]
 fn test_entropy_roundtrip() {
-    let entropy = [0x12u8, 0x34, 0x56, 0x78, 0x90, 0xab, 0xcd, 0xef, 0x12, 0x34, 0x56, 0x78, 0x90, 0xab, 0xcd, 0xef];
+    let entropy = [
+        0x12u8, 0x34, 0x56, 0x78, 0x90, 0xab, 0xcd, 0xef, 0x12, 0x34, 0x56, 0x78, 0x90, 0xab, 0xcd,
+        0xef,
+    ];
     let idiom_mnemonic = from_entropy(&entropy).unwrap();
     let recovered_entropy = idiom_mnemonic.to_entropy().unwrap();
     assert_eq!(entropy, recovered_entropy.as_slice());
@@ -113,10 +127,21 @@ fn test_mixed_separator() {
     let phrase = mnemonic.phrase();
     // 混合空格、全角空格和 tab
     let parts: Vec<&str> = phrase.split(' ').collect();
-    let mixed = format!("{}  {}　{}\t{}  {}　{}\t{}  {}　{}\t{}  {}　{}", 
-        parts[0], parts[1], parts[2], parts[3], parts[4],
-        parts[5], parts[6], parts[7], parts[8], parts[9],
-        parts[10], parts[11]);
+    let mixed = format!(
+        "{}  {}　{}\t{}  {}　{}\t{}  {}　{}\t{}  {}　{}",
+        parts[0],
+        parts[1],
+        parts[2],
+        parts[3],
+        parts[4],
+        parts[5],
+        parts[6],
+        parts[7],
+        parts[8],
+        parts[9],
+        parts[10],
+        parts[11]
+    );
     let recovered = from_phrase(&mixed).unwrap();
     assert_eq!(mnemonic, recovered);
 }
@@ -162,10 +187,10 @@ fn test_seed_iterations_configurable() {
     use fci4096::mnemonic::IdiomMnemonic;
     let entropy = [0x00u8; 16];
     let mnemonic = IdiomMnemonic::from_entropy(&entropy).unwrap();
-    
+
     let seed_default = mnemonic.to_seed("");
     let seed_custom = mnemonic.to_seed_with_iterations("", 2048);
-    
+
     assert_ne!(seed_default, seed_custom);
 }
 

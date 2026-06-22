@@ -1,6 +1,9 @@
 use crate::error::{Error, Result};
 use sha2::{Digest, Sha256};
 
+#[cfg(not(feature = "std"))]
+use alloc::{vec, vec::Vec};
+
 /// 4096-word list: 12 bits per word
 const BITS_PER_WORD: usize = 12;
 
@@ -35,20 +38,18 @@ pub fn generate_entropy(bits: usize) -> Result<Vec<u8>> {
         return Err(Error::InvalidEntropyLength(bits));
     }
 
-    let bytes = bits / 8;
-    let mut entropy = vec![0u8; bytes];
-
     #[cfg(feature = "rand")]
     {
+        let bytes = bits / 8;
+        let mut entropy = vec![0u8; bytes];
         getrandom::getrandom(&mut entropy)?;
+        Ok(entropy)
     }
 
     #[cfg(not(feature = "rand"))]
     {
-        return Err(Error::RandUnavailable);
+        Err(Error::RandUnavailable)
     }
-
-    Ok(entropy)
 }
 
 /// Compute the checksum bit count for a given entropy length.
@@ -60,13 +61,8 @@ fn checksum_bits_for_entropy(entropy_bits: usize) -> usize {
 }
 
 /// Word count to entropy bits lookup table (avoids fragile integer division).
-const WORD_COUNT_TO_ENTROPY_BITS: [(usize, usize); 5] = [
-    (12, 128),
-    (15, 160),
-    (18, 192),
-    (21, 224),
-    (24, 256),
-];
+const WORD_COUNT_TO_ENTROPY_BITS: [(usize, usize); 5] =
+    [(12, 128), (15, 160), (18, 192), (21, 224), (24, 256)];
 
 /// Look up entropy bits for a given word count (table lookup, avoids integer division rounding).
 fn entropy_bits_for_word_count(word_count: usize) -> usize {
@@ -152,7 +148,7 @@ pub(crate) fn indices_to_entropy_inner(indices: &[usize]) -> Result<Vec<u8>> {
 
     // Expand all indices into a bitstream
     let total_bits = word_count * BITS_PER_WORD;
-    let mut bits = vec![0u8; (total_bits + 7) / 8];
+    let mut bits = vec![0u8; total_bits.div_ceil(8)];
 
     for (w, &idx) in indices.iter().enumerate() {
         for b in 0..BITS_PER_WORD {
@@ -262,8 +258,14 @@ mod tests {
             vec![0xFF; 16],
             vec![0x55; 16],
             vec![0xAA; 16],
-            vec![0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF],
-            vec![0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF, 0xFE, 0xDC, 0xBA, 0x98, 0x76, 0x54, 0x32, 0x10],
+            vec![
+                0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF,
+                0x00, 0xFF,
+            ],
+            vec![
+                0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF, 0xFE, 0xDC, 0xBA, 0x98, 0x76, 0x54,
+                0x32, 0x10,
+            ],
         ];
         for entropy in &test_entropies {
             let indices = entropy_to_indices(entropy);

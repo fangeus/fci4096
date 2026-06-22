@@ -11,7 +11,7 @@ use std::env;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    
+
     let size = if args.len() > 1 {
         match args[1].as_str() {
             "12" => IdiomMnemonicSize::Idioms12,
@@ -27,11 +27,11 @@ fn main() {
     } else {
         IdiomMnemonicSize::Idioms12
     };
-    
+
     let idiom_mnemonic = generate(size).unwrap();
     println!("Generated mnemonic ({} idioms):", size.idiom_count());
     println!("{}", idiom_mnemonic.phrase());
-    
+
     let entropy = idiom_mnemonic.to_entropy().unwrap();
     println!("\nEntropy ({} bits):", entropy.len() * 8);
     println!("{}", hex::encode(&entropy));

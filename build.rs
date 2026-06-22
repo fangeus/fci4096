@@ -76,9 +76,12 @@ fn main() {
             // Skip header line (supports both full-width and half-width commas)
             if line_num == 0 {
                 let normalized_header = line.replace('\u{ff0c}', ",");
-                if normalized_header != "索引,成语,拼音" {
-                    panic!("Invalid CSV header. Expected '索引,成语,拼音' but got '{}'", line);
-                }
+            if normalized_header != "index,chinese_idiom,pinyin" {
+                panic!(
+                    "Invalid CSV header. Expected 'index,chinese_idiom,pinyin' but got '{}'",
+                    line
+                );
+            }
                 continue;
             }
 
@@ -86,12 +89,17 @@ fn main() {
             let normalized_line = line.replace('\u{ff0c}', ",");
             let parts: Vec<&str> = normalized_line.split(',').collect();
             if parts.len() != 3 {
-                panic!("Invalid CSV format at line {}: expected 3 fields, got {}", line_num + 1, parts.len());
+                panic!(
+                    "Invalid CSV format at line {}: expected 3 fields, got {}",
+                    line_num + 1,
+                    parts.len()
+                );
             }
 
-            let idx: usize = parts[0].trim().parse().unwrap_or_else(|_| {
-                panic!("Invalid index at line {}: {}", line_num + 1, parts[0])
-            });
+            let idx: usize = parts[0]
+                .trim()
+                .parse()
+                .unwrap_or_else(|_| panic!("Invalid index at line {}: {}", line_num + 1, parts[0]));
             let idiom = parts[1].trim().trim_start_matches('\u{feff}');
             let pinyin = parts[2].trim().trim_start_matches('\u{feff}');
 
@@ -115,7 +123,10 @@ fn main() {
 
             // Validate pinyin format (should contain tone numbers 1-4)
             if !pinyin.chars().any(|c| c.is_ascii_digit()) {
-                println!("cargo:warning=Pinyin may be missing tone marks at index {}: {}", idx, pinyin);
+                println!(
+                    "cargo:warning=Pinyin may be missing tone marks at index {}: {}",
+                    idx, pinyin
+                );
             }
 
             idioms_with_pinyin.push((idiom.to_string(), pinyin.to_string()));
@@ -147,7 +158,9 @@ fn main() {
         if search_entries[i].0 < search_entries[i - 1].0 {
             panic!(
                 "search_entries not sorted at index {}: '{}' < '{}'",
-                i, search_entries[i].0, search_entries[i - 1].0
+                i,
+                search_entries[i].0,
+                search_entries[i - 1].0
             );
         }
     }
@@ -164,7 +177,7 @@ fn main() {
     .unwrap();
     writeln!(
         output,
-        "pub const IDIOM_SEARCH: [(&str, usize); {}] = [",
+        "pub static IDIOM_SEARCH: [(&str, usize); {}] = [",
         IDIOM_COUNT
     )
     .unwrap();
@@ -180,12 +193,7 @@ fn main() {
         IDIOM_COUNT
     )
     .unwrap();
-    writeln!(
-        output,
-        "pub const IDIOM_LIST: [&str; {}] = [",
-        IDIOM_COUNT
-    )
-    .unwrap();
+    writeln!(output, "pub static IDIOM_LIST: [&str; {}] = [", IDIOM_COUNT).unwrap();
     for idiom in &idioms {
         writeln!(output, "    \"{}\",", idiom).unwrap();
     }
@@ -201,7 +209,7 @@ fn main() {
         .unwrap();
         writeln!(
             output,
-            "pub const IDIOM_WITH_PINYIN: [(&str, &str); {}] = [",
+            "pub static IDIOM_WITH_PINYIN: [(&str, &str); {}] = [",
             IDIOM_COUNT
         )
         .unwrap();
@@ -215,7 +223,11 @@ fn main() {
             "/// Idiom and pinyin array (CSV file not present, empty array)."
         )
         .unwrap();
-        writeln!(output, "pub const IDIOM_WITH_PINYIN: [(&str, &str); 0] = [];\n").unwrap();
+        writeln!(
+            output,
+            "pub static IDIOM_WITH_PINYIN: [(&str, &str); 0] = [];\n"
+        )
+        .unwrap();
     }
 
     // Generate count constant

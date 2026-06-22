@@ -2,6 +2,9 @@ use pbkdf2::pbkdf2_hmac_array;
 use sha2::Sha512;
 use unicode_normalization::UnicodeNormalization;
 
+#[cfg(not(feature = "std"))]
+use alloc::string::String;
+
 /// Default PBKDF2 iteration count (**Note: this project uses 4096, which differs from BIP39's 2048**).
 ///
 /// Higher iteration counts provide stronger security but slower computation on
@@ -47,11 +50,7 @@ pub fn mnemonic_to_seed_with_iterations(
     let mut salt = String::with_capacity(8 + normalized_passphrase.len());
     salt.push_str("mnemonic");
     salt.push_str(&normalized_passphrase);
-    pbkdf2_hmac_array::<Sha512, 64>(
-        normalized_mnemonic.as_bytes(),
-        salt.as_bytes(),
-        iterations,
-    )
+    pbkdf2_hmac_array::<Sha512, 64>(normalized_mnemonic.as_bytes(), salt.as_bytes(), iterations)
 }
 
 #[cfg(test)]

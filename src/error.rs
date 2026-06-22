@@ -1,3 +1,6 @@
+#[cfg(not(feature = "std"))]
+use alloc::string::String;
+
 /// Error type definitions.
 ///
 /// This enum is annotated with [`#[non_exhaustive]`]; new variants may be
@@ -34,10 +37,7 @@ impl core::fmt::Display for Error {
             #[cfg(feature = "rand")]
             Error::RandError(e) => write!(f, "Random generation error: {}", e),
             #[cfg(not(feature = "rand"))]
-            Error::RandUnavailable => write!(
-                f,
-                "Random number generator unavailable"
-            ),
+            Error::RandUnavailable => write!(f, "Random number generator unavailable"),
         }
     }
 }

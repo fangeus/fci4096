@@ -40,10 +40,15 @@ jobs:
       - name: Verify package contents
         run: |
           cargo package --list
-          cargo package --list | grep -q "data/four_chinese_idiom.txt" || {
-            echo "::error::Missing required file: data/four_chinese_idiom.txt"
-            exit 1
-          }
+          # build.rs hard-requires the txt file and reads the csv when present.
+          # Ensure both are packaged so cargo publish can run build.rs on crates.io.
+          for f in data/four_chinese_idiom.txt data/four_chinese_idiom.csv; do
+            cargo package --list | grep -q "^${f}$" || {
+              echo "::error::Missing required file in package: ${f}"
+              exit 1
+            }
+            echo "OK: ${f} included in package"
+          done
 
       - name: Dry-run publish
         run: cargo publish --dry-run
@@ -58,6 +63,8 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@stable
 
+      - uses: Swatinem/rust-cache@v2
+
       - name: Publish
         run: cargo publish
         env:
@@ -65,7 +72,7 @@ jobs:
 
   github-release:
     name: Create GitHub Release
-    needs: verify
+    needs: [verify, publish]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     steps:
@@ -82,7 +89,9 @@ jobs:
             BEGIN { found=0; output="" }
             /^## \[/ {
               if (found) exit
-              if ($0 ~ "## \\[" ver "\\]") found=1
+              # Use literal string match (index==1) instead of regex (~) so that
+              # dots in the version are treated literally, not as wildcards.
+              if (index($0, "## [" ver "]") == 1) found=1
               next
             }
             found { output = output $0 "\n" }

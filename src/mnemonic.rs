@@ -1,9 +1,16 @@
+#[cfg(feature = "rand")]
+use crate::entropy::generate_entropy;
 use crate::entropy::{
-    entropy_to_indices, generate_entropy, indices_to_entropy, indices_to_entropy_inner,
-    validate_mnemonic_length,
+    entropy_to_indices, indices_to_entropy, indices_to_entropy_inner, validate_mnemonic_length,
 };
 use crate::error::{Error, Result};
 use crate::idiom_list::ChineseIdiomList;
+
+#[cfg(not(feature = "std"))]
+use alloc::{
+    string::{String, ToString},
+    vec::Vec,
+};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -83,10 +90,7 @@ impl IdiomMnemonic {
         let indices = entropy_to_indices(entropy);
         let indices_u16: Vec<u16> = indices
             .iter()
-            .map(|&idx| {
-                idx.try_into()
-                    .map_err(|_| Error::InvalidIndex(idx))
-            })
+            .map(|&idx| idx.try_into().map_err(|_| Error::InvalidIndex(idx)))
             .collect::<Result<_>>()?;
 
         Ok(IdiomMnemonic {
@@ -102,7 +106,7 @@ impl IdiomMnemonic {
     pub fn from_phrase(phrase: &str) -> Result<Self> {
         // Split by spaces (half-width, full-width, tab) without intermediate String allocation
         let idiom_strings: Vec<&str> = phrase
-            .split(|c: char| c == ' ' || c == '\u{3000}' || c == '\t')
+            .split([' ', '\u{3000}', '\t'])
             .filter(|s| !s.is_empty())
             .collect();
 
@@ -121,10 +125,7 @@ impl IdiomMnemonic {
         // in idiom_to_index)
         indices_to_entropy_inner(&indices)?;
 
-        let indices_u16: Vec<u16> = indices
-            .into_iter()
-            .map(|idx| idx as u16)
-            .collect();
+        let indices_u16: Vec<u16> = indices.into_iter().map(|idx| idx as u16).collect();
 
         Ok(IdiomMnemonic {
             indices: indices_u16,

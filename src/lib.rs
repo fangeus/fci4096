@@ -36,10 +36,13 @@
 #[cfg(feature = "std")]
 extern crate std;
 
-/// Error type definitions
-pub mod error;
+#[cfg(not(feature = "std"))]
+extern crate alloc;
+
 /// Entropy encoding/decoding (bit operations and checksum calculation)
 pub mod entropy;
+/// Error type definitions
+pub mod error;
 /// Idiom wordlist and lookup
 pub mod idiom_list;
 /// Core mnemonic types
