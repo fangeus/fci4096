@@ -76,12 +76,12 @@ fn main() {
             // Skip header line (supports both full-width and half-width commas)
             if line_num == 0 {
                 let normalized_header = line.replace('\u{ff0c}', ",");
-            if normalized_header != "index,chinese_idiom,pinyin" {
-                panic!(
-                    "Invalid CSV header. Expected 'index,chinese_idiom,pinyin' but got '{}'",
-                    line
-                );
-            }
+                if normalized_header != "index,chinese_idiom,pinyin" {
+                    panic!(
+                        "Invalid CSV header. Expected 'index,chinese_idiom,pinyin' but got '{}'",
+                        line
+                    );
+                }
                 continue;
             }
 
