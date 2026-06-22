@@ -1,0 +1,6 @@
+blank_issues_enabled: false
+
+contact_links:
+  - name: Discussions
+    url: https://github.com/fangeus/fci4096/discussions
+    about: Please use Discussions for questions and general topics

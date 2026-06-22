@@ -1,0 +1,68 @@
+name: Bug Report
+description: Report a bug in fci4096
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug report!
+
+  - type: input
+    id: version
+    attributes:
+      label: Crate Version
+      placeholder: "0.1.0"
+    validations:
+      required: true
+
+  - type: input
+    id: rust_version
+    attributes:
+      label: Rust Version
+      placeholder: "rustc 1.95.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: target
+    attributes:
+      label: Target
+      options:
+        - Native (Linux / macOS / Windows)
+        - WASM (wasm32-unknown-unknown)
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to Reproduce
+      description: Minimal code example or steps to trigger the bug.
+      placeholder: |
+        ```rust
+        use fci4096::from_phrase;
+        // ...
+        ```
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      placeholder: What should happen?
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      placeholder: What actually happened? Include error messages or stack traces.
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      placeholder: Any other relevant information.

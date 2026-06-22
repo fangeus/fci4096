@@ -1,0 +1,33 @@
+name: Feature Request
+description: Suggest an idea for fci4096
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / Motivation
+      placeholder: What problem does this solve?
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      placeholder: How should it work?
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      placeholder: Any other solutions you considered?
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - Core API (mnemonic / entropy / seed)
+        - Idiom wordlist
+        - WASM bindings
+        - Documentation
+        - CI / tooling
+        - Other
